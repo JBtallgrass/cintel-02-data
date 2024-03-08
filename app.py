@@ -15,13 +15,13 @@ column_names = penguins_df.columns.tolist()
 print(column_names)
 
 
-ui.page_opts(title="Filling layout", fillable=True)
+ui.page_opts(title="Penguin Data", fillable=True)
 with ui.layout_columns():
 
     @render_plotly
     def plot1():
-        return px.histogram(px.data.tips(), y="tip")
+        return px.histogram(px.data.tips(), y="tip", color='sex')
 
     @render_plotly
     def plot2():
-        return px.histogram(px.data.tips(), y="total_bill")
+        return px.histogram(px.data.tips(), y="total_bill", color_discrete_sequence=['#FF5333'])  # Specific color
