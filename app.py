@@ -15,7 +15,7 @@ column_names = penguins_df.columns.tolist()
 print(column_names)
 
 
-ui.page_opts(title="Penguin Data", fillable=True)
+ui.page_opts(title="Waddle Analytics and Tuxedo Tally'24", fillable=True)
 with ui.layout_columns():
 
     @render_plotly
