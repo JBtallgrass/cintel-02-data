@@ -1,34 +1,104 @@
 from pathlib import Path
-
 import pandas as pd
 import seaborn as sns
-
 from shiny import reactive
+import matplotlib.pyplot as plt
+import numpy as np
 from shiny.express import render, ui
 
 
+# title of the project
+ui.page_opts(title="Tallgrass Analytics: Cars", fillable=True)
+
+# Add a Shiny UI sidebar for user interaction
+with ui.sidebar():
+    # Add a header to the sidebar
+    ui.h2("Sidebar")
+
+    # Add a dropdown to select a column
+    ui.input_selectize(
+        "selected_attribute",
+        "Select a Column",
+        choices=[
+            "mpg",
+            "cyl",
+            "disp",
+            "hp",
+            "drat",
+            "wt",
+            "qsec",
+            "vs",
+            "am",
+            "gear",
+            "carb",
+        ],
+    )
+
+    # Add a numeric input for Plotly histogram bins
+    ui.input_numeric("plotly_bin_count", "Plotly Histogram Bins", value=50)
+
+    # Add a slider for Seaborn bins
+    ui.input_slider("seaborn_bin_count", "Seaborn Bins", min=5, max=20, value=10)
+
+    # Add a checkbox group to filter species
+    ui.input_checkbox_group(
+        "selected_species_list",
+        "Filter Attributes",
+        choices=[
+            "mpg",
+            "cyl",
+            "disp",
+            "hp",
+            "drat",
+            "wt",
+            "qsec",
+            "vs",
+            "am",
+            "gear",
+            "carb",
+        ],
+        selected=[],
+        inline=True,
+    )
+
+    # Add a horizontal rule
+    ui.hr()
+
+    # Add a hyperlink
+    ui.a("GitHub", href="https://github.com/your-repo", target="_blank")
+
+
+# Reactive data loading
 @reactive.calc
 def dat():
     mtscars_df = Path(__file__).parent / "mtcars.csv"
-    mtscars_df = pandas.read_csv(mtscars_df)
+    mtscars_df = pd.read_csv(mtscars_df)
     return mtscars_df
 
 
-with ui.navset_card_underline():
+# Reactive data loading
+@reactive.calc
+def dat():
+    mtscars_df = Path(__file__).parent / "mtcars.csv"
+    mtscars_df = pd.read_csv(mtscars_df)
+    return mtscars_df
 
+
+# UI layout for data display
+with ui.navset_card_underline():
     with ui.nav_panel("Data frame"):
+
         @render.data_frame
         def frame():
-            # Give dat() to render.DataGrid to customize the grid
             return dat()
 
     with ui.nav_panel("Table"):
+
         @render.table
         def table():
             return dat()
 
-# title of the project
-ui.page_opts(title="Tallgrass Analytics: Cars", fillable=True)
+   
 
 
 
