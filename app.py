@@ -1,10 +1,10 @@
 import plotly.express as px
 from shiny.express import input, ui
+from shiny import render
 from shinywidgets import render_plotly
-import palmerpenguins  # dataframe
-import seaborn as sns
 import pandas as pd
-from shiny import reactive, render, req
+import seaborn as sns
+import palmerpenguins  # This package provides the Palmer Penguins dataset
 
 # built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
@@ -22,15 +22,15 @@ with ui.sidebar(open="open"):
     )
 
     # Create a numeric input for the number of Plotly histogram bins
-    ui.input_numeric("plotly_bin_count", " Number of plotly bins", 100)
+    ui.input_numeric("plotly_bin_count", "Number of plotly bins", 30)
 
     # Creates slider input for Seaborn bins
     ui.input_slider(
         "seaborn_bin_slider",
         "Number of Bins",
         1,
-        200,
-        100,
+        50,
+        10,
     )
 
     # Use ui.input_checkbox_group() to create a checkbox group input to filter the species
@@ -52,21 +52,21 @@ ui.a(
     target="_blank",
 )
 
-# Data table showing the penguin dataset Include 2 cards with a tabel and a grid
+# Data table showing the penguin dataset Include 2 cards with a table and a grid
 with ui.layout_columns(col_widths=(4, 8)):
     with ui.card(full_screen=True):  # Full screen option
         ui.h3("Penguins Data Table")
 
-    @render.data_frame
-    def render_penguins_table():
-        return render.DataTable(penguins_df)
+        @render.data_frame
+        def render_penguins_table():
+            return penguins_df
 
     with ui.card(full_screen=True):
         ui.h3("Penguins Data Grid")
 
-    @render.data_frame
-    def render_penguins_grid():
-        return render.DataGrid(penguins_df)
+        @render.data_frame
+        def render_penguins_grid():
+            return penguins_df
 
 
 # Use ui.hr() to add a horizontal rule to the sidebar
@@ -77,23 +77,16 @@ with ui.layout_columns():
     with ui.card(full_screen=True):
         ui.h3("All Species Histogram-Plotly")
 
-    @render_plotly
-    def plotly_histogram():
-        return px.histogram(penguins_df, x="species")
-
-    with ui.card(full_screen=True):
-        ui.h3("All Species Histogram-Seaborn")
-
         @render_plotly
-        def seaborn_histogram():
-            return sns.histplot(penguins_df, x="species")
+        def plotly_histogram():
+            return px.histogram(penguins_df, x="species")
 
     with ui.card(full_screen=True):
         ui.h3("All Species ScatterPlot-plotly")
 
-    @render_plotly
-    def plotly_scatterplot():
-        return px.scatter(
+        @render_plotly
+        def plotly_scatterplot():
+            return px.scatter(
             penguins_df,
             title="All Species ScatterPlot-plotly",
             x="body_mass_g",
