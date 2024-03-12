@@ -1,180 +1,103 @@
-from pathlib import Path
-import pandas as pd
+import plotly.express as px
+from shiny.express import input, ui
+from shinywidgets import render_plotly
+import palmerpenguins  # dataframe
 import seaborn as sns
-from shiny import reactive
-import matplotlib.pyplot as plt
-import numpy as np
-from shiny.express import render, ui
+import pandas as pd
+from shiny import reactive, render, req
 
+# built-in function to load the Palmer Penguins dataset
+penguins_df = palmerpenguins.load_penguins()
 
-# title of the project
-ui.page_opts(title="Tallgrass Analytics: Cars", fillable=True)
+# Page name
+ui.page_opts(title="JB Penguins Data", fillable=True)
 
-# Add a Shiny UI sidebar for user interaction
-with ui.sidebar():
-    # Add a header to the sidebar
+# sidebar for user interaction
+with ui.sidebar(open="open"):
     ui.h2("Sidebar")
-
-    # Add a dropdown to select a column
     ui.input_selectize(
         "selected_attribute",
-        "Select a Column",
-        choices=[
-            "mpg",
-            "cyl",
-            "disp",
-            "hp",
-            "drat",
-            "wt",
-            "qsec",
-            "vs",
-            "am",
-            "gear",
-            "carb",
-        ],
+        "Select Plotly Attribute",
+        ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"],
     )
 
-    # Add a numeric input for Plotly histogram bins
-    ui.input_numeric("plotly_bin_count", "Plotly Histogram Bins", value=50)
+    # Create a numeric input for the number of Plotly histogram bins
+    ui.input_numeric("plotly_bin_count", " Number of plotly bins", 100)
 
-    # Add a slider for Seaborn bins
-    ui.input_slider("seaborn_bin_count", "Seaborn Bins", min=5, max=20, value=10)
+    # Creates slider input for Seaborn bins
+    ui.input_slider(
+        "seaborn_bin_slider",
+        "Number of Bins",
+        1,
+        200,
+        100,
+    )
 
-    # Add a checkbox group to filter species
+    # Use ui.input_checkbox_group() to create a checkbox group input to filter the species
     ui.input_checkbox_group(
         "selected_species_list",
-        "Filter Attributes",
-        choices=[
-            "mpg",
-            "cyl",
-            "disp",
-            "hp",
-            "drat",
-            "wt",
-            "qsec",
-            "vs",
-            "am",
-            "gear",
-            "carb",
-        ],
-        selected=[],
+        "Species in Scatterplot",
+        ["Adelie", "Gentoo", "Chinstrap"],
+        selected=["Adelie"],
         inline=True,
     )
 
-    # Add a horizontal rule
-    ui.hr()
-
-    # Add a hyperlink
-    ui.a("GitHub", href="https://github.com/your-repo", target="_blank")
-
-
-# Reactive data loading
-@reactive.calc
-def dat():
-    mtscars_df = Path(__file__).parent / "mtcars.csv"
-    mtscars_df = pd.read_csv(mtscars_df)
-    return mtscars_df
-
-
-# Reactive data loading
-@reactive.calc
-def dat():
-    mtscars_df = Path(__file__).parent / "mtcars.csv"
-    mtscars_df = pd.read_csv(mtscars_df)
-    return mtscars_df
-
-
-# UI layout for data display
-with ui.navset_card_underline():
-    with ui.nav_panel("Data frame"):
-
-        @render.data_frame
-        def frame():
-            return dat()
-
-    with ui.nav_panel("Table"):
-
-        @render.table
-        def table():
-            return dat()
-
-   
-
-
-
-
-
-
-
-
-# Add a Shiny UI sidebar for user interaction
-
-# Use the ui.sidebar() function to create a sidebar
-
-# Set the open parameter to "open" to make the sidebar open by default
-ui.sidebar(open='open')
-
-# Use a with block to add content to the sidebar
-
-
-# Use the ui.h2() function to add a 2nd level header to the sidebar
-#   pass in a string argument (in quotes) to set the header text to "Sidebar"
-
-# Use ui.input_selectize() to create a dropdown input to choose a column
-#   pass in three arguments:
-#   the name of the input (in quotes), e.g., "selected_attribute"
-#   the label for the input (in quotes)
-#   a list of options for the input (in square brackets) 
-#   e.g. ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]
-
-# Use ui.input_numeric() to create a numeric input for the number of Plotly histogram bins
-#   pass in two arguments:
-#   the name of the input (in quotes), e.g. "plotly_bin_count"
-#   the label for the input (in quotes)
-
-# Use ui.input_slider() to create a slider input for the number of Seaborn bins
-#   pass in four arguments:
-#   the name of the input (in quotes), e.g. "seaborn_bin_count"
-#   the label for the input (in quotes)
-#   the minimum value for the input (as an integer)
-#   the maximum value for the input (as an integer)
-#   the default value for the input (as an integer)
-
-# Use ui.input_checkbox_group() to create a checkbox group input to filter the species
-#   pass in five arguments:
-#   the name of the input (in quotes), e.g.  "selected_species_list"
-#   the label for the input (in quotes)
-#   a list of options for the input (in square brackets) as ["Adelie", "Gentoo", "Chinstrap"]
-#   a keyword argument selected= a list of selected options for the input (in square brackets)
-#   a keyword argument inline= a Boolean value (True or False) as you like
-
 # Use ui.hr() to add a horizontal rule to the sidebar
+ui.hr()
 
 # Use ui.a() to add a hyperlink to the sidebar
-#   pass in two arguments:
-#   the text for the hyperlink (in quotes), e.g. "GitHub"
-#   a keyword argument href= the URL for the hyperlink (in quotes), e.g. your GitHub repo URL
-#   a keyword argument target= "_blank" to open the link in a new tab
+ui.a(
+    "JBTallgrass GitHub",
+    href="https://github.com/JBtallgrass/cintel-02-data",
+    target="_blank",
+)
 
-# When passing in multiple arguments to a function, separate them with commas.   
+# Data table showing the penguin dataset Include 2 cards with a tabel and a grid
+with ui.layout_columns(col_widths=(4, 8)):
+    with ui.card(full_screen=True):  # Full screen option
+        ui.h3("Penguins Data Table")
+
+    @render.data_frame
+    def render_penguins_table():
+        return render.DataTable(penguins_df)
+
+    with ui.card(full_screen=True):
+        ui.h3("Penguins Data Grid")
+
+    @render.data_frame
+    def render_penguins_grid():
+        return render.DataGrid(penguins_df)
 
 
+# Use ui.hr() to add a horizontal rule to the sidebar
+ui.hr()
 
+# Creates a Plotly Histogram showing all species
+with ui.layout_columns():
+    with ui.card(full_screen=True):
+        ui.h3("All Species Histogram-Plotly")
 
+    @render_plotly
+    def plotly_histogram():
+        return px.histogram(penguins_df, x="species")
 
+    with ui.card(full_screen=True):
+        ui.h3("All Species Histogram-Seaborn")
 
+        @render_plotly
+        def seaborn_histogram():
+            return sns.histplot(penguins_df, x="species")
 
+    with ui.card(full_screen=True):
+        ui.h3("All Species ScatterPlot-plotly")
 
-
-
-
-
-
-
-   # @render_plotly
-  #  def plot1():
-   #     return px.histogram(px.data.tips(), y="tip", color='sex')
-
- #   @render_plotly
- #   def plot2():
- #       return px.histogram(px.data.tips(), y="total_bill", color_discrete_sequence=['#FF5333'])  # Specific color
+    @render_plotly
+    def plotly_scatterplot():
+        return px.scatter(
+            penguins_df,
+            title="All Species ScatterPlot-plotly",
+            x="body_mass_g",
+            y="bill_length_mm",
+            color="species",
+            symbol="species",
+        )
